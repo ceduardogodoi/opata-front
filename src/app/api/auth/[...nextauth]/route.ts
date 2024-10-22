@@ -1,4 +1,5 @@
 import { env } from "@/env";
+import { SignInUseCase } from "@/use-case/auth/sign-in";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -9,32 +10,20 @@ const handler = NextAuth({
       name: "Credentials",
       credentials: {
         email: {
-          label: "E-mail",
+          label: "Email",
           type: "email",
           placeholder: "john@gmail.com",
         },
         password: {
-          label: "Senha",
+          label: "Password",
           type: "password",
         },
       },
       async authorize(credentials) {
         if (credentials == null) return null;
 
-        const response = await fetch(`${env.API_URL}/sign-in`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: credentials.email,
-            password: credentials.password,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data["AuthenticationResult"]["AccessToken"] != null) {
+        const data = await SignInUseCase.execute(credentials);
+        if (data?.AuthenticationResult?.AccessToken != null) {
           return {
             id: "1",
             name: "Carlos Godoi",
